@@ -11,7 +11,7 @@
 FROM ubuntu:18.04
 
 # Pass some arguments
-ARG FR10_LINUX_DEPLOY_PACK_URL="https://fine-build.oss-cn-shanghai.aliyuncs.com/finereport/10.0/tomcat/tomcat-linux.tar.gz"
+ARG FR10_LINUX_DEPLOY_PACK_URL="http://fine-build.oss-cn-shanghai.aliyuncs.com/finereport/10.0/tomcat/tomcat-linux.tar.gz"
 ARG FINEDOCKER_SCRIPT_URL="https://raw.githubusercontent.com/ysslang/FineDocker/master/finedocker.sh"
 ARG TZ="Asia/Shanghai"
 
@@ -26,13 +26,16 @@ ENV \
   LANG=C.UTF-8 \
   JAVA_HOME=/0/tomcat/jre/ \
   CATALINA_HOME=/0/tomcat/ \
+  JAVA_OPTS="$JAVA_OPTS -Xms256M -Xmx700M" \
+  CATALINA_OPTS="$CATALINA_OPTS -Xms256m -Xmx512m"  \
   PATH="/0/tomcat/jre/bin:/0/tomcat/bin:$PATH" \
   HEALTH_CHECK_URL="http://localhost:8080/webroot/decision/system/health" \
   HEALTH_CHECK_PATTERN="{\"data\":\"OK\"}"
 
 # Create work directory
 WORKDIR /0/
-
+COPY tomcat-linux.tar.gz /0
+COPY finedocker.sh /0
 # Deploy FineReport 10
 RUN set -eux; \
   \
@@ -54,8 +57,8 @@ RUN set -eux; \
   rm -rf /var/lib/apt/lists/*; \
   \
 ## Add FineReport 10.0 deployment package, with jre and tomcat, and add finedocker script
-  wget --no-check-certificate --no-verbose -O /0/tomcat-linux.tar.gz $FR10_LINUX_DEPLOY_PACK_URL; \
-  wget --no-check-certificate --no-verbose -O /0/finedocker.sh $FINEDOCKER_SCRIPT_URL; \
+#  wget -O /0/tomcat-linux.tar.gz $FR10_LINUX_DEPLOY_PACK_URL; \
+#  wget  -O /0/finedocker.sh $FINEDOCKER_SCRIPT_URL; \
   \
 ## Unpack FineReport 10.0 package
   tar xzf tomcat-linux.tar.gz; \
